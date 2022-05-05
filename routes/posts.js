@@ -5,7 +5,7 @@ const PostsControllers = require('../controllers/posts');
 router.get('/', PostsControllers.getPosts);
 
 router.post('/', function (req, res, next) {
-  res.render('index', { title: 'Express' });
+  PostsControllers.createdPosts(req, res)
 });
 
 router.delete('/', function (req, res, next) {
