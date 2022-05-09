@@ -4,20 +4,12 @@ const PostsControllers = require('../controllers/posts');
 
 router.get('/', PostsControllers.getPosts);
 
-router.post('/', function (req, res, next) {
-  PostsControllers.createdPosts(req, res)
-});
+router.post('/', PostsControllers.createdPosts);
 
-router.delete('/', function (req, res, next) {
-  res.render('index', { title: 'Express' });
-});
+router.delete('/', PostsControllers.deleteAll);
 
-router.delete('/', function (req, res, next) {
-  res.render('index', { title: 'Express' });
-});
+router.delete('/:id', PostsControllers.deleteSingle);
 
-router.patch('/', function (req, res, next) {
-  res.render('index', { title: 'Express' });
-});
+router.patch('/:id', PostsControllers.patchPosts);
 
 module.exports = router;
