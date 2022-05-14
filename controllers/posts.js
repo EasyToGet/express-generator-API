@@ -8,35 +8,41 @@ const posts = {
   },
   async createdPosts(req, res) {
     try {
-      const body = req.body;
-      if (body.content !== '') {
+      const data = req.body;
+      if (data.content !== '') {
         const newPost = await Posts.create({
-          name: body.name,
-          tags: body.tags,
-          type: body.type,
-          content: body.content
+          name: data.name,
+          tags: data.tags,
+          type: data.type,
+          content: data.content
         })
         successHandle(res, '新增成功', newPost);
       } else {
-        errorHandle(res, '欄位沒有正確，或沒有此 ID');
+        errorHandle(res, '欄位是空的，請填寫');
       }
     } catch (error) {
       errorHandle(res, error.message);
     }
   },
   async deleteAll(req, res) {
-    await Posts.deleteMany({});
-    const deleteAll = await Posts.find();
-    successHandle(res, '刪除成功', deleteAll);
+    // 取出 req 的 Url，再判斷是否等於 '/posts/'
+    if(req.originalUrl == '/posts/') {
+      errorHandle(res, '欄位沒有正確，或沒有此 ID');
+    } else {
+      await Posts.deleteMany({});
+      const deleteAll = await Posts.find();
+      successHandle(res, '刪除成功', deleteAll);
+    }
   },
   async deleteSingle(req, res) {
     try {
       const id = req.params.id;
       const deleteSingle = await Posts.findByIdAndDelete(id);
       if (deleteSingle) {
-        successHandle(res, '刪除成功', deleteSingle);
+        const post = await Posts.find();
+        successHandle(res, '刪除成功', post);
       } else {
-        errorHandle(res, '欄位沒有正確，或沒有此 ID');
+        errorHandle(res, '查無此 ID');
       }
     } catch (error) {
       errorHandle(res, error.message);
@@ -45,24 +51,27 @@ const posts = {
   async patchPosts(req, res) {
     try {
       const id = req.params.id;
-      const body = req.body;
+      const data = req.body;
+      if (!data.content) {
+        return errorHandle(res, '欄位是空的，請填寫');
+      }
       const patchPosts = await Posts.findByIdAndUpdate(id, {
-        name: body.name,
-        tags: body.tags,
-        type: body.type,
-        content: body.content
+        name: data.name,
+        content: data.content,
+        tags: data.tags,
+        type: data.type
       },
-      { 
+      {
         new: true,
         runValidators: true
       });
-      if (patchPosts) {
-        successHandle(res, '更新成功', patchPosts);
-      } else {
-        errorHandle(res, '欄位沒有正確，或沒有此 ID');
+      if (!patchPosts) {
+        return errorHandle(res, '查無此 ID');
       }
+      const post = await Posts.find();
+      successHandle(res, '更新成功', post);
     } catch (error) {
-      errorHandle(res, error.message);
+      errorHandle(res, "欄位沒有正確，或沒有此 ID");
     }
   }
 }
